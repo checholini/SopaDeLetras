@@ -5,6 +5,7 @@
  */
 package reto4;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -30,7 +31,7 @@ public class Reto4 {
         buscarPalabra(inicialPosA, inicialPosB, finalPosA, finalPosB,sopa);       
     }
     
-   
+    
     /**
      * Metodo para imprimir la sopa de letras
      * @param sopa Matriz a imprimir
@@ -47,6 +48,7 @@ public class Reto4 {
     /**
      * Metodo para determinar que tipo de Busqueda se va a realizar.
      * Para el reto 4 solo se implemanta horizontal.
+     * Implementada busqueda vertical y diagonal para el reto 5
      * Posibilidad de escalar luego.
      * @param inicialPosA
      * @param inicialPosB
@@ -56,24 +58,112 @@ public class Reto4 {
      */
     private static void buscarPalabra(int inicialPosA, int inicialPosB, int finalPosA, int finalPosB, char[][] sopa) {
         if(inicialPosA == finalPosA){
-            solucionarHorizontal(inicialPosB, finalPosB, sopa[inicialPosA]);
+            busquedaHorizontal(inicialPosB, finalPosB, sopa[inicialPosA]);
+        }
+        else if(inicialPosB == finalPosB){
+            busquedaVertical(inicialPosA, finalPosA, sopa, inicialPosB);
         }
         else{
-            System.out.println("No es una linea horizontal");
+            if(verDiagonalidad( inicialPosA, finalPosA,  inicialPosB, finalPosB)){
+                busquedaDiagonal(inicialPosA, inicialPosB, finalPosA, finalPosB,sopa);
+            }
+            else{
+                System.out.println("No es una coordenada valida");
+            }
         }
+    }
+    
+    /**
+     * Metodo para realizar la busqueda horizontal
+     * @param inicialPosB
+     * @param finalPosB
+     * @param sopa 
+     */
+    private static void busquedaHorizontal(int inicialPosB, int finalPosB, char[] sopa) {
+        int maxIndex = Math.max(inicialPosB, finalPosB)+1;
+        int minIndex = Math.min(inicialPosB, finalPosB);
+        char[] linea = Arrays.copyOfRange(sopa, minIndex, maxIndex);
+        verificar(linea);
+    }
+    
+    /**
+     * Metodo para realizar la busqueda vertical
+     * @param inicialPosA
+     * @param finalPosA
+     * @param sopa
+     * @param inicialPosB 
+     */
+    private static void busquedaVertical(int inicialPosA, int finalPosA, char[][] sopa, int inicialPosB) {
+       int maxIndex = Math.max(inicialPosA, finalPosA)+1;
+        int minIndex = Math.min(inicialPosA, finalPosA);
+        char linea[] = new char[maxIndex-minIndex];
+        int j = minIndex;
+        for (int i = 0; i < linea.length; i++) {
+            linea[i] = sopa[j][inicialPosB];
+            j++;
+        }
+        verificar(linea);
+    }
+    
+    /**
+     * Metodo para realizar la busqueda Diagonal
+     * @param inicialPosA
+     * @param inicialPosB
+     * @param finalPosA
+     * @param finalPosB
+     * @param sopa 
+     */
+    private static void busquedaDiagonal(int inicialPosA, int inicialPosB, int finalPosA, int finalPosB, char[][] sopa){
+        int maxIndexA = Math.max(inicialPosA, finalPosA)+1;
+        int minIndexA = Math.min(inicialPosA, finalPosA);
+        int minIndexB = Math.min(inicialPosB, finalPosB);
+        int diferencia = maxIndexA - minIndexA;
+        char linea[] = new char[diferencia];
+        if((inicialPosA < finalPosA && inicialPosB < finalPosB)||(inicialPosA > finalPosA && inicialPosB > finalPosB)){
+            int x = minIndexA;
+            int y = minIndexB;
+            for (int i = 0; i < linea.length; i++) {
+                linea[i] = sopa[x][y];
+                x++;
+                y++;
+            }
+        }
+        else{
+            int x = maxIndexA-1;
+            int y = minIndexB;
+            for (int i = 0; i < linea.length; i++) {
+                linea[i] = sopa[x][y];
+                x--;
+                y++;
+            }
+        }                
+        System.out.println(Arrays.toString(linea));
+        verificar(linea);
+    }
+    
+    /**
+     * Metodo que valida que dos puntos sean diagonales
+     * @param inicialPosA
+     * @param finalPosA
+     * @param inicialPosB
+     * @param finalPosB
+     * @return 
+     */
+    private static boolean verDiagonalidad(int inicialPosA, int finalPosA, int inicialPosB, int finalPosB) {
+        int maxIndexA = Math.max(inicialPosA, finalPosA)+1;
+        int minIndexA = Math.min(inicialPosA, finalPosA);
+        int maxIndexB = Math.max(inicialPosB, finalPosB)+1;
+        int minIndexB = Math.min(inicialPosB, finalPosB);
+        return (maxIndexA-minIndexA) == (maxIndexB-minIndexB);
     }
 
     /**
-     * Metodo para buscar una palabra horizontal
-     * @param inicialPosB
-     * @param finalPosB
+     * Metodo para verificar si la palabra esta contenida
      * @param linea 
      */
-    private static void solucionarHorizontal(int inicialPosB, int finalPosB, char[] linea) {
+    private static void verificar(char[] linea) {
         String lineaString = new String(linea);
-        int maxIndex = Math.max(inicialPosB, finalPosB)+1;
-        int minIndex = Math.min(inicialPosB, finalPosB);
-        lineaString = lineaString.substring(minIndex, maxIndex);
+        System.out.println(linea);
         for (String palabra : palabras) {
             if (palabra.length() == lineaString.length()) {
                 if(palabra.charAt(0) == lineaString.charAt(0)){
@@ -111,7 +201,7 @@ public class Reto4 {
         }
         return true;
     }    
-    
+       
     /**
      * Metodo que comprueba si una palabra es palindroma 
      * @param lineaString
@@ -134,16 +224,16 @@ public class Reto4 {
     private static char[][] initSopa() {
         char[][] sopa = new char[10][];
         char lineaUno[]  = {'T','E','C','N','O','L','O','G','I','A'};
-        char lineaDos[]  = {'V','W','B','I','S','E','R','E','S','F'};
-        char lineaTres[]  = {'O','R','E','C','O','N','O','C','E','R'};
+        char lineaDos[]  = {'V','W','B','I','V','R','Q','H','N','F'};
+        char lineaTres[]  = {'O','C','E','J','T','I','E','O','N','W'};
         char lineaCuatro[]  = {'W','I','W','R','Z','O','F','Q','O','N'};
-        char lineaCinco[]  = {'P','E','Y','R','A','D','A','R','V','O'};
+        char lineaCinco[]  = {'P','E','Y','D','V','Y','N','N','V','O'};
         char lineaSeis[]  = {'I','N','D','U','S','T','R','I','A','D'};
         //char lineaSeis[]  = {'A','I','R','T','S','U','D','N','I','D'};
         char lineaSiete[]  = {'F','C','F','E','U','Q','H','B','C','A'};
         char lineaOcho[]  = {'Z','I','M','G','E','T','K','B','I','C'};
         char lineaNueve[]  = {'J','A','V','A','M','R','H','G','O','I'};
-        char lineaDiez[]  = {'S','O','M','E','T','E','M','O','S','S'};
+        char lineaDiez[]  = {'D','K','I','Y','T','I','H','A','N','S'};
         sopa[0] = lineaUno;     
         sopa[1] = lineaDos;     
         sopa[2] = lineaTres;     
@@ -161,13 +251,10 @@ public class Reto4 {
      * Metodo para quemar las palabras que se pueden encontrar en la sopa
      */
     private static void initPalabras() {
-        palabras = new String[7];
-        palabras[0] = "Tecnologia".toUpperCase();
-        palabras[1] = "Reconocer".toUpperCase();
-        palabras[2] = "Industria".toUpperCase();
-        palabras[3] = "Java".toUpperCase();
-        palabras[4] = "Sometemos".toUpperCase();
-        palabras[5] = "Radar".toUpperCase();
-        palabras[6] = "Seres".toUpperCase();
-    }    
+        palabras = new String[4];
+        palabras[0] = "TECNOLOGIA";
+        palabras[1] = "CIENCIA";
+        palabras[2] = "INNOVACION";
+        palabras[3] = "JAVA";
+    }   
 }
