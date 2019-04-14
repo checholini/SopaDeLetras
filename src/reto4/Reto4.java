@@ -5,6 +5,7 @@
  */
 package reto4;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -13,14 +14,15 @@ import java.util.Scanner;
  * @author Ingenieria
  */
 public class Reto4 {
-    public static String[] palabras;
+    public static String[] palabras = new String[5];
+    public static Scanner sc = new Scanner(System.in);
+    public static ArrayList posVertical = new ArrayList();
+    public static ArrayList posHorizontal = new ArrayList();
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
         char[][] sopa = initSopa();
-        initPalabras();
         printSopa(sopa);
         System.out.println("Ingrese la posicion inicial");
         int inicialPosA = sc.nextInt();    
@@ -218,43 +220,173 @@ public class Reto4 {
     }
 
     /**
-     * Metodo para quemar datos de la sopa
+     * Metodo para crear datos de la sopa
      * @return 
      */
     private static char[][] initSopa() {
-        char[][] sopa = new char[10][];
-        char lineaUno[]  = {'T','E','C','N','O','L','O','G','I','A'};
-        char lineaDos[]  = {'V','W','B','I','V','R','Q','H','N','F'};
-        char lineaTres[]  = {'O','C','E','J','T','I','E','O','N','W'};
-        char lineaCuatro[]  = {'W','I','W','R','Z','O','F','Q','O','N'};
-        char lineaCinco[]  = {'P','E','Y','D','V','Y','N','N','V','O'};
-        char lineaSeis[]  = {'I','N','D','U','S','T','R','I','A','D'};
-        //char lineaSeis[]  = {'A','I','R','T','S','U','D','N','I','D'};
-        char lineaSiete[]  = {'F','C','F','E','U','Q','H','B','C','A'};
-        char lineaOcho[]  = {'Z','I','M','G','E','T','K','B','I','C'};
-        char lineaNueve[]  = {'J','A','V','A','M','R','H','G','O','I'};
-        char lineaDiez[]  = {'D','K','I','Y','T','I','H','A','N','S'};
-        sopa[0] = lineaUno;     
-        sopa[1] = lineaDos;     
-        sopa[2] = lineaTres;     
-        sopa[3] = lineaCuatro;     
-        sopa[4] = lineaCinco;     
-        sopa[5] = lineaSeis;     
-        sopa[6] = lineaSiete;     
-        sopa[7] = lineaOcho;     
-        sopa[8] = lineaNueve;   
-        sopa[9] = lineaDiez;
+        char[][] sopa = new char[10][10];
+        for (int i = 0; i < 5; i++) {
+            System.out.println("ingrese la palabra numero "+(i+1)+"/5 de la sopa de letras");
+            String palabra = sc.nextLine();
+            System.out.println("Seleccione la forma de escritura");
+            System.out.println("1. Vertical\n2. Horizontal\n3. Diagonal"); 
+            int seleccion = Integer.parseInt(sc.nextLine());
+            agregarPalabra(palabra,seleccion, sopa);
+            palabras[i] = palabra;
+            printSopa(sopa);
+        }
+        llenarEspacios(sopa);
         return sopa;
     }
     
-     /**
-     * Metodo para quemar las palabras que se pueden encontrar en la sopa
+    /**
+     * Metodo para agregar caracteres a la sopa
+     * @param sopa 
      */
-    private static void initPalabras() {
-        palabras = new String[4];
-        palabras[0] = "TECNOLOGIA";
-        palabras[1] = "CIENCIA";
-        palabras[2] = "INNOVACION";
-        palabras[3] = "JAVA";
-    }   
+    private static void llenarEspacios(char[][] sopa) {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                if(sopa[i][j] == '\u0000'){
+                    int valor = (int) (Math.random() * 26);
+                    char letra = (char)((char) valor+'A');
+                    sopa[i][j] = letra;
+                }
+            }
+        }
+    }  
+    
+    /**
+     * Metodo que agrega las palabras ingresadas por el usuario a la sopa
+     * caso 1, verticales
+     * caso 2, horizontales
+     * caso 3, diagonales
+     * probabilidad de palabra inversa 30%
+     * @param palabra
+     * @param seleccion
+     * @param sopa 
+     */
+    public static void agregarPalabra(String palabra, int seleccion, char[][] sopa) {
+        palabra = palabra.toUpperCase();
+        boolean flag = true;
+        int intentos = 0;
+        int fil = 0;
+        int col = 0;
+        switch (seleccion) {
+            case 1:
+                while (flag) {
+                    fil = (int) (Math.random() * (10 - palabra.length()));
+                    col = (int) (Math.random() * (10));
+                    flag = false;
+                    int pos = 0;
+                    if (intentos > 100000) {
+                        System.out.println("No se encontro un lugar para la palabra");
+                    }
+                    if (Math.random() < 0.3) {
+                        for (int i = fil+palabra.length()-1; i >= fil ; i--) {
+                            if (sopa[i][col] != '\u0000' && sopa[i][col] != palabra.charAt(pos)) {
+                                flag = true;
+                                break;
+                            }
+                        pos++;
+                    }
+                    intentos++;
+                    }       
+                    else{
+                        for (int i = fil; i < fil + palabra.length(); i++) {
+                            if (sopa[i][col] != '\u0000' && sopa[i][col] != palabra.charAt(pos)) {
+                                flag = true;
+                                break;
+                            }
+                            pos++;
+                        }
+                        intentos++;
+                    }
+                }
+                int pos = 0;
+                if (!flag) {
+                    for (int i = fil; i < fil + palabra.length(); i++) {
+                        sopa[i][col] = palabra.charAt(pos);
+                        pos++;
+                    }
+                }
+                break;
+            case 2:
+                while (flag) {
+                    fil = (int) (Math.random() * (sopa.length));
+                    col = (int) (Math.random() * (sopa[fil].length - palabra.length()));
+                    flag = false;
+                    pos = 0;
+                    if (intentos > 1000) {
+                        System.out.println("No se encontro un lugar para la palabra");
+                    }
+                    if (Math.random() < 0.3) {
+                        for (int i = col+palabra.length()-1; i >= col; i--) {
+                            if (sopa[fil][i] != '\u0000' && sopa[fil][i] != palabra.charAt(pos)) {
+                                flag = true;
+                                break;
+                            }
+                            pos++;
+                        }
+                    }
+                    else{
+                        for (int i = col; i < col + palabra.length(); i++ ) {
+                            if (sopa[fil][i] != '\u0000' && sopa[fil][i] != palabra.charAt(pos)) {
+                                flag = true;
+                                break;
+                            }
+                        pos++;
+                        }
+                        intentos++; 
+                    }
+                }
+                pos = 0;
+                for (int i = col; i < col + palabra.length(); i++) {
+                    sopa[fil][i] = palabra.charAt(pos);
+                    pos++;
+                }
+                break;
+            case 3:                
+                while (flag) {
+                    fil = (int) (Math.random() * (sopa.length - palabra.length()));
+                    col = (int) (Math.random() * (sopa[fil].length - palabra.length()));
+                    flag = false;
+                    pos = 0;            
+                    if (Math.random() < 0.5) { 
+                        for (int i = fil, j = col; pos < palabra.length(); i++, j++) {
+                            if (sopa[i][j] != '\u0000' && sopa[i][j] != palabra.charAt(pos)) {
+                                flag = true;
+                                break;
+                            }
+                            pos++;
+                        }
+                        pos = 0;
+                        if (!flag) {
+                            for (int i = fil, j = col; pos < palabra.length(); i++, j++) {
+                                sopa[i][j] = palabra.charAt(pos);
+                                pos++;
+                            }
+                        }
+                    } else { 
+                        fil += palabra.length() - 1;
+                        pos = 0;
+                        for (int i = fil, j = col; pos < palabra.length(); i--, j++) {
+                            if (sopa[i][j] != '\u0000' && sopa[i][j] != palabra.charAt(pos)) {
+                                flag = true;
+                                break;
+                            }
+                            pos++;
+                        }
+                        pos = 0;
+                        if (!flag) {
+                            for (int i = fil, j = col; pos < palabra.length(); i--, j++) {
+                                sopa[i][j] = palabra.charAt(pos);
+                                pos++;
+                            }
+                        }
+                    }
+                    intentos++;
+                }
+            break;
+        }
+    }
 }
